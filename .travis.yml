@@ -1,0 +1,16 @@
+sudo: required
+
+services:
+    - docker
+
+script:
+    - docker build -t mjalas/latex .
+    - docker run --name latex mjalas/latex /bin/bash -c "echo Done!"
+    - docker rm latex
+    - docker tag $(docker images | grep mjalas/latex | awk {'print $3'}) mjalas/latex:latest
+
+after_success:
+    - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        docker push mjalas/latex;
+      fi
